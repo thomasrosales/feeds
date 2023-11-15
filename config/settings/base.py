@@ -81,7 +81,7 @@ THIRD_PARTY_APPS = [
 
 LOCAL_APPS = [
     "feeds_for_sendcloud.users",
-    # Your stuff: custom apps go here
+    "feeds_for_sendcloud.feeds"
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS

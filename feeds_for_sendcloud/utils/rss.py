@@ -1,5 +1,5 @@
 import feedparser
 
 
-def xml_to_dict(rss_content: str):
+def parse_feed_to_dict(rss_content: str) -> dict:
     return feedparser.parse(rss_content)

@@ -1,28 +1,29 @@
 from datetime import datetime, timezone
 
 import requests
-from django.db import models, transaction
-from django_lifecycle import LifecycleModel, hook, AFTER_SAVE
+from django.db import models
+from django_lifecycle import AFTER_SAVE, LifecycleModel, hook
 from model_utils import Choices
 from model_utils.models import TimeStampedModel
 from rest_framework import status
 
-from feeds_for_sendcloud.feeds.managers import PostsManager, FeedsManager, FeedsNextExecutionManager
 from feeds_for_sendcloud.users.models import User
-from feeds_for_sendcloud.utils.rss import xml_to_dict
+from feeds_for_sendcloud.utils.rss import parse_feed_to_dict
 
+from .managers import FeedsManager, FeedsNextExecutionManager, PostsManager
 from .tasks import process_posts
 
 
 class Feed(LifecycleModel, TimeStampedModel):
     STATE_CHOICES = Choices("initial", "processing", "updated", "failed", "invalid")
     source = models.URLField(max_length=500, unique=True, db_index=True)
-    last_refresh = models.DateTimeField()
+    last_refresh = models.DateTimeField(default=None, null=True)
     state = models.CharField(
         max_length=20,
         choices=STATE_CHOICES,
         default="initial",
     )
+    source_err = models.JSONField(default=dict)
 
     # Relationships
 
@@ -38,30 +39,33 @@ class Feed(LifecycleModel, TimeStampedModel):
 
     # Hooks
 
-    @hook(AFTER_SAVE, when="status", is_now="initial")
+    @hook(AFTER_SAVE, when="state", is_now="initial", on_commit=True)
     def init_process_posts(self):
-        transaction.on_commit(
-            lambda: process_posts.delay(self.pk)
-        )
+        process_posts.delay(self.pk)
 
     # Business Logic
 
-    def process_source_posts(self):
+    def process_source_posts(self, force=False):
+        if self.is_invalid and not force:
+            return
         response = requests.get(self.source)
         if response.status_code != status.HTTP_200_OK:
             self.state = self.STATE_CHOICES.failed
+            self.source_err = {"status_code": response.status_code, "error": response.text}
+        elif "text/xml" not in response.headers["content-type"]:
+            self.state = self.STATE_CHOICES.invalid
         else:
-            self._process_rss_content(response.text)
+            self._process_rss_content_and_create_posts(response.text)
             self.state = self.STATE_CHOICES.updated
             self.last_refresh = datetime.now(timezone.utc)
         self.save()
 
-    def _process_rss_content(self, rss_content):
-        rss = xml_to_dict(rss_content)
+    def _process_rss_content_and_create_posts(self, rss_content):
+        rss = parse_feed_to_dict(rss_content)
         new_posts = []
         for entry in rss.entries:
             if not self.posts.filter(link=entry.link).exists():
-                post = Post(title=entry.title, description=entry.description, link=entry.link, feed=self)
+                post = Post(title=entry.title, description=entry.get("description", ""), link=entry.link, feed=self)
                 new_posts.append(post)
         Post.objects.bulk_create(new_posts)
 
@@ -71,26 +75,33 @@ class Feed(LifecycleModel, TimeStampedModel):
     def unfollow(self, user: User):
         self.followers.remove(user)
 
+    @property
     def has_failed(self):
         return self.state in [self.STATE_CHOICES.invalid, self.STATE_CHOICES.failed]
+
+    @property
+    def is_invalid(self):
+        return self.state == self.STATE_CHOICES.invalid
+
+    def __str__(self):
+        return f"Feed({self.pk}) for {self.source}"
 
 
 class Post(TimeStampedModel):
     title = models.CharField(max_length=200)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     link = models.URLField(max_length=200)
 
     # Relationships
 
     feed = models.ForeignKey(Feed, related_name="posts", on_delete=models.CASCADE)
-    user_reads = models.ManyToManyField(
+    users = models.ManyToManyField(
         User,
-        through="ReadPostUser",
-        through_fields=("post", "user"),
+        related_name="read_posts",
     )
 
     class Meta:
-        unique_together = ("link", "post")
+        unique_together = ("link", "feed")
         indexes = [
             models.Index(fields=("link", "title")),
         ]
@@ -100,12 +111,12 @@ class Post(TimeStampedModel):
     objects = PostsManager()
 
     def read(self, user: User):
-        self.user_reads.add(user)
+        if user.is_follow_feed(self.feed.pk):
+            self.users.add(user)
 
     def unread(self, user: User):
-        self.user_reads.remove(user)
+        if user.is_follow_feed(self.feed.pk):
+            self.users.remove(user)
 
-
-class ReadPostUser(TimeStampedModel):
-    post = models.ForeignKey(Post, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    def __str__(self):
+        return f"Post({self.pk}) object with title {self.title}"

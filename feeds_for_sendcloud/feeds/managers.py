@@ -1,8 +1,7 @@
 from datetime import datetime, timezone
 
 from django.db import models
-from django.db.models import ExpressionWrapper, DateTimeField, F
-from django.db.models.functions import ExtractMinute
+from django.db.models import DurationField, ExpressionWrapper, F
 
 
 class FeedsManager(models.Manager):
@@ -16,14 +15,9 @@ class FeedsNextExecutionManager(models.Manager):
         return (
             super()
             .get_queryset()
-            .filter(status="updated")
-            .annotate(
-                next_execution=ExpressionWrapper(
-                    date_now - F("last_refresh"), output_field=DateTimeField()
-                )
-            )
-            .annotate(next_execution_minutes=ExtractMinute("next_execution"))
-            .filter(next_execution_minutes__gte=5)
+            .filter(state="updated")
+            .annotate(time_difference=ExpressionWrapper(date_now - F("last_refresh"), output_field=DurationField()))
+            .filter(time_difference__gte="5 minutes")  # this just works for postgres database
         )
 
 

@@ -1,5 +1,3 @@
-from datetime import datetime, timezone
-
 from celery.utils.log import get_task_logger
 from django.apps import apps
 from django.core.exceptions import ObjectDoesNotExist
@@ -15,10 +13,8 @@ logger = get_task_logger(__name__)
 def process_posts(feed_pk):
     Feed = apps.get_model("feeds", "Feed")
     feed = Feed.objects.get(pk=feed_pk)
-    feed.process_source_posts()
 
-    feed.last_refresh = datetime.now(timezone.utc)
-    feed.save()
+    feed.process_source_posts()
 
     return feed.status
 
@@ -45,6 +41,8 @@ def update_single_feed_posts(feed_pk):
         logger.info(f"Feed({feed_pk}) was removed")
     else:
         feed.process_source_posts()
-        if feed.has_failed():
-            raise TaskException(f"Feed({feed.pk}) failed")
+        if feed.has_failed:
+            error_message = f"Feed({feed.pk}) - {feed.state}"
+            logger.info(error_message)
+            raise TaskException(error_message)
         logger.info(f"Feed({feed.pk}) updated")
