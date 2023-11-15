@@ -134,6 +134,10 @@ django-celery-beat = "2.5.0"
 celery = "5.3.5"
 redis = "5.0.1"
 hiredis = "2.2.3"
+django-lifecycle = "^1.1.2"
+requests = "2.31.0"
+addict = "2.4.0"
+feedparser = "^6.0.10"
 
 [tool.poetry.group.dev.dependencies]
 ipdb = "==0.13.11"

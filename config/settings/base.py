@@ -1,6 +1,7 @@
 """
 Base settings to build other settings files upon.
 """
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -75,6 +76,7 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "drf_spectacular",
+    "django_lifecycle_checks",
 ]
 
 LOCAL_APPS = [
@@ -307,3 +309,10 @@ SPECTACULAR_SETTINGS = {
 }
 # Your stuff...
 # ------------------------------------------------------------------------------
+
+CELERY_BEAT_SCHEDULE = {
+    "update_feeds_posts": {
+        "task": "feeds_for_sendcloud.feeds.tasks.update_feeds_posts",
+        "schedule": timedelta(minutes=1),
+    },
+}
