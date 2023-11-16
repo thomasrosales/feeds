@@ -11,6 +11,23 @@ Have installed:
 - Docker or Docker Desktop >= 24.0.6
 - Postgres (you can use a docker container) >= 13.5 (for local deployment is configured to use SQLLite or Postgres, the author recommends had Postgres installed)
 
+## Business decitions
+
+During the implementation of the solution for the Feeds application we decided the followings business rules or definitions for the project:
+
+- All users must be authenticated to use the service.
+  - The authentication selected for the application is BasicAuthentication.
+- If you want to create/update/remove new Feed you must be superuser/admin user or has adminsite access. To do it you need to create a superuser using django commands. Here.
+- If you want to force the update process on a Feed you must follow the Feed first.
+- If you want to mark as read/unread a post you must follow the Feed first.
+- If you want to see an specific Posts you must follow the Feed first.
+- If you followed a Feed and you have marked as read some Posts if you decided to unfollow the Feed the Posts read marks remains, although you can't filter or access to the posts till you start following again the Feed.
+- The author decides to use Django instead of FastAPI.
+- Test cases were added to thet tests/ folder. There is still work to do regarding test cases, the author has covered the most important cases.
+
+## Documentation 
+
+- It was provided the following path to get the API documentation using swagger: http://localhost:8000/api/docs/
 
 ### Docker
 
