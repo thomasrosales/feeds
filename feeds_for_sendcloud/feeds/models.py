@@ -8,13 +8,14 @@ from model_utils.models import TimeStampedModel
 from rest_framework import status
 
 from feeds_for_sendcloud.users.models import User
-from feeds_for_sendcloud.utils.rss import parse_feed_to_dict
+from feeds_for_sendcloud.utils.rss import parse_rss_to_dict, xml_is_present
 
 from .managers import FeedsManager, FeedsNextExecutionManager, PostsManager
 from .tasks import process_posts
 
 
 class Feed(LifecycleModel, TimeStampedModel):
+    VALID_SOURCES = ("application/rss+xml; charset=utf-8", "text/xml", "text/xml; charset=utf-8")
     STATE_CHOICES = Choices("initial", "processing", "updated", "failed", "invalid")
     source = models.URLField(max_length=500, unique=True, db_index=True)
     last_refresh = models.DateTimeField(default=None, null=True)
@@ -52,7 +53,9 @@ class Feed(LifecycleModel, TimeStampedModel):
         if response.status_code != status.HTTP_200_OK:
             self.state = self.STATE_CHOICES.failed
             self.source_err = {"status_code": response.status_code, "error": response.text}
-        elif "text/xml" not in response.headers["content-type"]:
+        elif response.headers["content-type"] not in self.VALID_SOURCES or not xml_is_present(
+            response.headers["content-type"]
+        ):
             self.state = self.STATE_CHOICES.invalid
         else:
             self._process_rss_content_and_create_posts(response.text)
@@ -61,7 +64,7 @@ class Feed(LifecycleModel, TimeStampedModel):
         self.save()
 
     def _process_rss_content_and_create_posts(self, rss_content):
-        rss = parse_feed_to_dict(rss_content)
+        rss = parse_rss_to_dict(rss_content)
         new_posts = []
         for entry in rss.entries:
             if not self.posts.filter(link=entry.link).exists():
