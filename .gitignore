@@ -335,3 +335,4 @@ feeds_for_sendcloud/media/
 !.envs/.local/
 
 .idea/
+celerybeat-schedule.*

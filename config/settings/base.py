@@ -1,6 +1,7 @@
 """
 Base settings to build other settings files upon.
 """
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -75,12 +76,11 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "drf_spectacular",
+    "django_lifecycle_checks",
+    "django_filters",
 ]
 
-LOCAL_APPS = [
-    "feeds_for_sendcloud.users",
-    # Your stuff: custom apps go here
-]
+LOCAL_APPS = ["feeds_for_sendcloud.users", "feeds_for_sendcloud.feeds"]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -252,46 +252,24 @@ LOGGING = {
 if USE_TZ:
     # https://docs.celeryq.dev/en/stable/userguide/configuration.html#std:setting-timezone
     CELERY_TIMEZONE = TIME_ZONE
+# https://docs.celeryq.dev/en/stable/getting-started/backends-and-brokers/redis.html
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html#std:setting-broker_url
 CELERY_BROKER_URL = env("CELERY_BROKER_URL")
 # https://docs.celeryq.dev/en/stable/userguide/configuration.html#std:setting-result_backend
 CELERY_RESULT_BACKEND = CELERY_BROKER_URL
-# https://docs.celeryq.dev/en/stable/userguide/configuration.html#result-extended
-CELERY_RESULT_EXTENDED = True
-# https://docs.celeryq.dev/en/stable/userguide/configuration.html#result-backend-always-retry
-# https://github.com/celery/celery/pull/6122
-CELERY_RESULT_BACKEND_ALWAYS_RETRY = True
-# https://docs.celeryq.dev/en/stable/userguide/configuration.html#result-backend-max-retries
-CELERY_RESULT_BACKEND_MAX_RETRIES = 10
-# https://docs.celeryq.dev/en/stable/userguide/configuration.html#std:setting-accept_content
-CELERY_ACCEPT_CONTENT = ["json"]
-# https://docs.celeryq.dev/en/stable/userguide/configuration.html#std:setting-task_serializer
-CELERY_TASK_SERIALIZER = "json"
-# https://docs.celeryq.dev/en/stable/userguide/configuration.html#std:setting-result_serializer
-CELERY_RESULT_SERIALIZER = "json"
-# https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-time-limit
-# TODO: set to whatever value is adequate in your circumstances
-CELERY_TASK_TIME_LIMIT = 5 * 60
-# https://docs.celeryq.dev/en/stable/userguide/configuration.html#task-soft-time-limit
-# TODO: set to whatever value is adequate in your circumstances
-CELERY_TASK_SOFT_TIME_LIMIT = 60
-# https://docs.celeryq.dev/en/stable/userguide/configuration.html#beat-scheduler
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
-# https://docs.celeryq.dev/en/stable/userguide/configuration.html#worker-send-task-events
-CELERY_WORKER_SEND_TASK_EVENTS = True
-# https://docs.celeryq.dev/en/stable/userguide/configuration.html#std-setting-task_send_sent_event
-CELERY_TASK_SEND_SENT_EVENT = True
+
 
 # django-rest-framework
 # -------------------------------------------------------------------------------
 # django-rest-framework - https://www.django-rest-framework.org/api-guide/settings/
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.BasicAuthentication", # FIXME: Basic authentication is suitable for quick prototyping and tests. However, you should avoid using it in production since the credentials are passed in plain text.
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_FILTER_BACKENDS":  ['django_filters.rest_framework.DjangoFilterBackend']
 }
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
