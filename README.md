@@ -43,6 +43,9 @@ Once inside and with the virtual environment activated:
 - You now have prepared all necessary to run the Django application, but you need first run the [migrations process.](https://docs.djangoproject.com/en/4.2/topics/migrations/) The migration process allows you to create the database Tables for each apps in the Django application:
 
       $ python manager.py migrate
+- And the to have all admin service available
+
+      $ python manager.py collectstatic
 
 ## Basic Commands
 
@@ -53,6 +56,8 @@ Once inside and with the virtual environment activated:
 - To create a **superuser account**, use this command:
 
       $ python manage.py createsuperuser
+
+### Getting Basic Authentication
 
 ### Running Django App
 

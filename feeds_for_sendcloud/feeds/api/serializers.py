@@ -1,16 +1,42 @@
-from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from feeds_for_sendcloud.users.models import User as UserType
-
-User = get_user_model()
+from ..models import Feed, Post
 
 
-class UserSerializer(serializers.ModelSerializer[UserType]):
+class FeedSerializer(serializers.ModelSerializer):
+    following = serializers.SerializerMethodField()
+
     class Meta:
-        model = User
-        fields = ("username", "name", "url")
+        model = Feed
+        fields = (
+            "id",
+            "source",
+            "last_refresh",
+            "state",
+            "source_err",
+            "following",
+        )
+        read_only_fields = ("last_refresh", "state", "source_err", "following")
 
-        extra_kwargs = {
-            "url": {"view_name": "api:user-detail", "lookup_field": "username"},
-        }
+    def get_following(self, obj: Feed):
+        user = self.context['request'].user
+        return obj.is_followed_by(user)
+
+
+class PostSerializer(serializers.ModelSerializer):
+    feed = serializers.SlugRelatedField(
+        many=False,
+        read_only=True,
+        slug_field="source"
+    )
+
+    class Meta:
+        model = Post
+        fields = (
+            "id",
+            "feed",
+            "title",
+            "description",
+            "link",
+        )
+        read_only_fields = fields

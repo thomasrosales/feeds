@@ -78,6 +78,9 @@ class Feed(LifecycleModel, TimeStampedModel):
     def unfollow(self, user: User):
         self.followers.remove(user)
 
+    def is_followed_by(self, user: User):
+        return self.followers.filter(pk=user.pk).exists()
+
     @property
     def has_failed(self):
         return self.state in [self.STATE_CHOICES.invalid, self.STATE_CHOICES.failed]
@@ -114,11 +117,13 @@ class Post(TimeStampedModel):
     objects = PostsManager()
 
     def read(self, user: User):
-        if user.is_follow_feed(self.feed.pk):
+        if user.is_following_feed(self.feed.pk):
             self.users.add(user)
 
     def unread(self, user: User):
-        if user.is_follow_feed(self.feed.pk):
+        # if a user decided to stop following a feed
+        # all read posts will be associated to him, but he cannot perform any operation
+        if user.is_following_feed(self.feed.pk):
             self.users.remove(user)
 
     def __str__(self):
