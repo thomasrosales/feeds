@@ -5,7 +5,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from config.celery_app import app
 
 from .exceptions import TaskException
-from ..utils.task_retries import get_next_retry_countdown
+from ..utils.task_retries import generate_next_retry_countdown
 
 logger = get_task_logger(__name__)
 
@@ -36,7 +36,7 @@ def process_feeds_posts():
 
 
 # https://docs.celeryq.dev/en/latest/userguide/tasks.html#Task.retry_backoff
-@app.task(bind=True, ignore_result=True)
+@app.task(bind=True, name="process_single_feed_posts", ignore_result=True)
 def update_single_feed_posts(self, feed_pk):
     Feed = apps.get_model("feeds", "Feed")
     try:
@@ -49,6 +49,6 @@ def update_single_feed_posts(self, feed_pk):
             raise self.retry(
                 exc=TaskException(f"Feed({feed.pk}) - {feed.state}"),
                 max_retries=3,
-                countdown=get_next_retry_countdown(str(self.request.retries + 1)),
+                countdown=generate_next_retry_countdown(self.request.retries),
             )
         logger.info(f"Feed({feed.pk}) updated")

@@ -18,5 +18,5 @@ class User(AbstractUser):
     def __str__(self):
         return f"{self.first_name} {self.last_name} with email {self.email}"
 
-    def is_following_feed(self, feed_id):
+    def is_following_feed(self, feed_id: int):
         return self.feeds.filter(pk=feed_id).exists()

@@ -139,6 +139,7 @@ requests = "2.31.0"
 addict = "2.4.0"
 feedparser = "^6.0.10"
 eventlet = "^0.33.3"
+deprecation = "^2.1.0"
 
 [tool.poetry.group.dev.dependencies]
 ipdb = "==0.13.11"
