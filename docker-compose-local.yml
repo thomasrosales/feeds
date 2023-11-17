@@ -1,35 +1,21 @@
 version: '3'
 services:
-    django: &django
-      build:
-        dockerfile: docker/Dockerfile
-        context: .
-        args: 
-          - SYNC_ARGS=--without dev --sync
-      image: feeds_for_sendcloud_django
-      depends_on:
-        - postgres
-        - redis
-      env_file:
-        - ./docker/envs/.django
-        - ./docker/envs/.postgres
-      entrypoint: ["./scripts/start.sh"]
-      ports:
-        - "8000:8000"
-
     postgres:
       image: postgres:13.13-alpine
       volumes:
-        - postgres_data:/var/lib/postgresql/data
-        - postgres_data_backups:/backups
+        - postgres_local_data:/var/lib/postgresql/data
+        - postgres_local_data_backups:/backups
       env_file:
-        - ./docker/envs/.postgres
+        - ./docker/envs/local/.postgres
+      ports:
+        - "5433:5432"
 
     redis:
       image: redis:7.0-alpine
-
+      ports:
+        - "6379:6379"
 
 volumes:
-  postgres_data: {}
-  postgres_data_backups: {}
+  postgres_local_data: {}
+  postgres_local_data_backups: {}
 
