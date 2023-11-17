@@ -4,7 +4,7 @@ ARG SYNC_ARGS
 
 RUN mkdir /app \
     && mkdir /app/scripts \
-    && mkdir /app/feeeds_for_sendcloud \
+    && mkdir /app/feeds_for_sendcloud \
     && mkdir -p /app/config
 
 COPY . /app
@@ -21,6 +21,6 @@ RUN chmod +rwx ./scripts/entrypoint.sh \
 	&& chmod +rwx ./scripts/start.sh \
 	&& chmod +rwx ./scripts/celery.sh \
 	&& chmod +rwx ./scripts/celery_beat.sh \
-	&& chmod +rwx ./scripts/flower.sh 
+	&& chmod +rwx ./scripts/flower.sh
 
 ENTRYPOINT ["./scripts/entrypoint.sh"]

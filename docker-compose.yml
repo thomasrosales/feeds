@@ -4,6 +4,8 @@ services:
       build:
         dockerfile: docker/Dockerfile
         context: .
+        args: 
+          - SYNC_ARGS=--without dev --sync
       image: feeds_for_sendcloud_django
       depends_on:
         - postgres
@@ -16,7 +18,7 @@ services:
         - "8000:8000"
 
     postgres:
-      image: postgres:13.5
+      image: postgres:13.13-alpine
       volumes:
         - postgres_data:/var/lib/postgresql/data
         - postgres_data_backups:/backups
@@ -24,27 +26,29 @@ services:
         - ./docker/envs/.postgres
 
     redis:
-      image: redis:7.0
+      image: redis:7.0-alpine
 
     celeryworker:
       <<: *django
       image: feeds_for_sendcloud_django
+      depends_on:
+        - postgres
+        - redis
+        - django
       ports: []
+      restart: on-failure
       entrypoint: ["./scripts/celery.sh"]
 
     celerybeat:
       <<: *django
       image: feeds_for_sendcloud_django
+      depends_on:
+        - postgres
+        - redis
+        - django
       ports: []
+      restart: on-failure
       entrypoint: ["./scripts/celery_beat.sh"]
-
-    flower:
-      <<: *django
-      image: feeds_for_sendcloud_django
-      entrypoint: ["./scripts/flower.sh"]
-      ports:
-        - "5555:5555"
-
 
 volumes:
   postgres_data: {}
