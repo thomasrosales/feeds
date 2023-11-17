@@ -43,9 +43,11 @@ Once inside and with the virtual environment activated:
 - You now have prepared all necessary to run the Django application, but you need first run the [migrations process.](https://docs.djangoproject.com/en/4.2/topics/migrations/) The migration process allows you to create the database Tables for each apps in the Django application:
 
       $ python manager.py migrate
-- And the to have all admin service available
+- And then you should execute the next command to have all admin service statics available and working
 
       $ python manager.py collectstatic
+
+Now you are able to run the django application locally. [Here](#running-django-app). 
 
 ## Basic Commands
 
@@ -57,11 +59,26 @@ Once inside and with the virtual environment activated:
 
       $ python manage.py createsuperuser
 
-### Getting Basic Authentication
-
 ### Running Django App
 
       $ python manager.py runserver_plus
+
+### Getting Basic Authentication
+
+This perform this step the django application must be running. **[Go here](#running-django-app)**
+
+- To create a *regular user*, go to the admin site where you can create, edit and remove users. Once you have created a user or a superuser you must generate a base64 token to be used as a basic token:
+
+      $ python manage.py pass_base64 <USER> <PASSWORD>
+   
+   The abode script generates the base64 token, you should see something similar to: 
+
+      $ Successfully created "YWRtaW46YWRtaW4="
+   
+   This token must be used as Basic Authorization Token inside the request header like this:
+
+      $ curl -H "Accept: application/json" -H "Authorization: Basic YWRtaW46YWRtaW4=" -X GET http://127.0.0.1:8000/api/feeds/
+
 
 ### Running Django Shell
 

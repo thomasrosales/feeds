@@ -4,10 +4,7 @@ from rest_framework.routers import DefaultRouter, SimpleRouter
 from feeds_for_sendcloud.feeds.api.views import FeedViewSet, PostViewSet
 from feeds_for_sendcloud.users.api.views import UserViewSet
 
-if settings.DEBUG:
-    router = DefaultRouter()
-else:
-    router = SimpleRouter()
+router = DefaultRouter()
 
 router.register("users", UserViewSet, basename="users")
 router.register("feeds", FeedViewSet, basename="feeds")
