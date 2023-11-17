@@ -24,14 +24,11 @@ class Feed(LifecycleModel, TimeStampedModel):
         choices=STATE_CHOICES,
         default="initial",
     )
-    source_err = models.JSONField(default=dict)
+    source_err = models.JSONField(default=dict, blank=True)
 
     # Relationships
 
-    followers = models.ManyToManyField(
-        User,
-        related_name="feeds",
-    )
+    followers = models.ManyToManyField(User, related_name="feeds", blank=True)
 
     # Managers
 

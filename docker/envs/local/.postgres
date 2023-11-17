@@ -1,0 +1,6 @@
+# PostgreSQL
+# ------------------------------------------------------------------------------
+POSTGRES_PORT=5432
+POSTGRES_DB=sendcloud
+POSTGRES_USER=sendcloud
+POSTGRES_PASSWORD=sendcloud

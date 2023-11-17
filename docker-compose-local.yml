@@ -1,0 +1,21 @@
+version: '3'
+services:
+    postgres:
+      image: postgres:13.13-alpine
+      volumes:
+        - postgres_local_data:/var/lib/postgresql/data
+        - postgres_local_data_backups:/backups
+      env_file:
+        - ./docker/envs/local/.postgres
+      ports:
+        - "5433:5432"
+
+    redis:
+      image: redis:7.0-alpine
+      ports:
+        - "6379:6379"
+
+volumes:
+  postgres_local_data: {}
+  postgres_local_data_backups: {}
+
