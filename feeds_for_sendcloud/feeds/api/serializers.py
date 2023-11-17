@@ -19,16 +19,12 @@ class FeedSerializer(serializers.ModelSerializer):
         read_only_fields = ("last_refresh", "state", "source_err", "following")
 
     def get_following(self, obj: Feed):
-        user = self.context['request'].user
+        user = self.context["request"].user
         return obj.is_followed_by(user)
 
 
 class PostSerializer(serializers.ModelSerializer):
-    feed = serializers.SlugRelatedField(
-        many=False,
-        read_only=True,
-        slug_field="source"
-    )
+    feed = serializers.SlugRelatedField(many=False, read_only=True, slug_field="source")
 
     class Meta:
         model = Post

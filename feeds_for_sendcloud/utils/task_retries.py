@@ -1,4 +1,5 @@
 import deprecation
+
 import feeds_for_sendcloud
 
 
@@ -6,7 +7,7 @@ import feeds_for_sendcloud
     deprecated_in="0.1.0",
     removed_in="0.2.0",
     current_version=feeds_for_sendcloud.__version__,
-    details="Use the generate_next_retry_countdown function instead"
+    details="Use the generate_next_retry_countdown function instead",
 )
 def get_next_retry_countdown(retry_step: str) -> int:
     return {

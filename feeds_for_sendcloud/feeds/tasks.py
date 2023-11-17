@@ -4,8 +4,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from config.celery_app import app
 
-from .exceptions import TaskException
 from ..utils.task_retries import generate_next_retry_countdown
+from .exceptions import TaskException
 
 logger = get_task_logger(__name__)
 
