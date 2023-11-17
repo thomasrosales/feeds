@@ -16,8 +16,4 @@ class Command(BaseCommand):
         username_password = bytes(f"{username}:{password}", "utf-8")
         # https://docs.python.org/es/3/library/base64.html
         basic_authentication_decoded = base64.b64encode(username_password)
-        self.stdout.write(
-            self.style.SUCCESS(
-                f'Successfully created "{basic_authentication_decoded.decode("utf-8")}"'
-            )
-        )
+        self.stdout.write(self.style.SUCCESS(f'Successfully created "{basic_authentication_decoded.decode("utf-8")}"'))

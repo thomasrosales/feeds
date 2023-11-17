@@ -1,17 +1,17 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
+from ..models import Feed, Post
 from .filters import PostReadOrNotFilterBackend
 from .serializers import FeedSerializer, PostSerializer
-from ..models import Feed, Post
 
 
 class FeedViewSet(ModelViewSet):
@@ -47,8 +47,7 @@ class FeedViewSet(ModelViewSet):
         instance = self.get_object()
         if not instance.is_followed_by(user):
             return Response(
-                {"error": "You must follow the feed before force refresh"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "You must follow the feed before force refresh"}, status=status.HTTP_400_BAD_REQUEST
             )
         instance.process_source_posts(force=True)
         return Response({"state": instance.state}, status=status.HTTP_200_OK)
@@ -87,4 +86,3 @@ class PostViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
         instance = self.get_object()
         instance.unread(user)
         return Response({}, status=status.HTTP_204_NO_CONTENT)
-

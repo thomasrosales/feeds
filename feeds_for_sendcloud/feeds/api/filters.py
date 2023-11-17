@@ -10,11 +10,8 @@ class PostFilter(Filter):
 
 
 class PostReadOrNotFilterBackend(BaseFilterBackend):
-    filter_class = PostFilter(field_name='read')
-    READ_PARAM_MAP = {
-        "true": True,
-        "false": False
-    }
+    filter_class = PostFilter(field_name="read")
+    READ_PARAM_MAP = {"true": True, "false": False}
 
     def filter_queryset(self, request, queryset, view):
         read_param = request.query_params.get("read")
