@@ -1,0 +1,52 @@
+version: '3'
+services:
+    django: &django
+      build:
+        dockerfile: docker/Dockerfile
+        context: .
+      image: feeds_for_sendcloud_django
+      depends_on:
+        - postgres
+        - redis
+      env_file:
+        - ./docker/envs/.django
+        - ./docker/envs/.postgres
+      entrypoint: ["./scripts/start.sh"]
+      ports:
+        - "8000:8000"
+
+    postgres:
+      image: postgres:13.5
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+        - postgres_data_backups:/backups
+      env_file:
+        - ./docker/envs/.postgres
+
+    redis:
+      image: redis:7.0
+
+    celeryworker:
+      <<: *django
+      image: feeds_for_sendcloud_django
+      ports: []
+      entrypoint: ["./scripts/celery.sh"]
+
+    celerybeat:
+      <<: *django
+      image: feeds_for_sendcloud_django
+      ports: []
+      entrypoint: ["./scripts/celery_beat.sh"]
+
+    flower:
+      <<: *django
+      image: feeds_for_sendcloud_django
+      entrypoint: ["./scripts/flower.sh"]
+      ports:
+        - "5555:5555"
+
+
+volumes:
+  postgres_data: {}
+  postgres_data_backups: {}
+

@@ -24,7 +24,7 @@ def test_process_feeds_posts(mock_update_single_feed_posts):
 
     process_feeds_posts()
 
-    mock_update_single_feed_posts.delay.calls_count = len(feeds)
+    assert mock_update_single_feed_posts.delay.call_count == len(feeds)
 
 
 @patch("feeds_for_sendcloud.feeds.tasks.update_single_feed_posts")
