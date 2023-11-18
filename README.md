@@ -48,18 +48,40 @@ During the implementation of the solution for the Feeds application the author d
 
 1. Create a feed with a wrong source type (a wrong source is a website that returns something different to a rss xml):
    ```bash
-   curl -H "Accept: application/json" -H "Authorization: Basic YWRtaW46YWRtaW4=" -X POST -d '{"source": "https://.../curl-post-json-example"}' http://127.0.0.1:8000/api/feeds/
+   curl -H "Accept: application/json" -H "Authorization: Basic <AUTH_USER_TOKEN>" -X POST -d '{"source": "https://.../curl-post-json-example"}' http://localhost:8000/api/feeds/
    ```
    - After the feed creation a task is triggered to get all post related to that feed source, due to is a wrong RSS XML, the process will fail and marked as failed
    - The workaround is to update the Feed state to "updated" and the last_refresh datetime field through admin site.
    - Once you save it, the async update process will take this Feed to start adding the new posts if it has at last one, however, due to the feed source is invalid the process will fail and will trigger the retry mechanism.
 
-2. Other solution may be to disconnect your internet when the application is running normally, this will produce every update post process of each Feed failed due to HTTP error connection, producing the trigger of the retry mechanism.
+2. Other solution may be to disconnect your internet when the application is running normally, this will produce every update post process of each Feed failed due to HTTP error connection, producing the retry mechanism trigger.
  
+
+### How to recreate the force update scenario
+
+1. Create a feed with a wrong source type (a wrong source is a website that returns something different to a rss xml):
+   ```bash
+   curl -H "Accept: application/json" -H "Authorization: Basic <AUTH_USER_TOKEN>" -X POST -d '{"source": "https://.../curl-post-json-example"}' http://localhost:8000/api/feeds/
+   ```
+   - After the feed creation a task is triggered to get all post related to that feed source, due to is a wrong RSS XML, the process will fail and marked as failed
+   - Make sure you are following the feed for force update process:
+     ```bash
+     curl -H "Accept: application/json" -H "Authorization: Basic <AUTH_USER_TOKEN>" -X POST http://localhost:8000/api/feeds/<FEED_ID>/follow-me/
+     ```
+   - Update the source feed with a valid one:
+     ```bash
+     curl -H "Accept: application/json" -H "Authorization: Basic <AUTH_USER_TOKEN>" -X PATCH -d '{"source": "http://valid-source/rss"}' http://localhost:8000/api/feeds/<FEED_ID>/
+     ```
+   - Force the update process:
+     ```bash
+     curl -H "Accept: application/json" -H "Authorization: Basic <AUTH_USER_TOKEN>" -X POST http://localhost:8000/api/feeds/<FEED_ID>/force-update/
+     ```
+
 ## Docker
 
 ```bash
 docker-compose up --build -d
+docker-compose -f ./docker/docker-compose-local.yml up --build -d
 docker-compose down
 ```
 
@@ -141,7 +163,7 @@ This perform this step the django application must be running. **[Go here](#runn
    ```
    This token must be used as Basic Authorization Token inside the request header like this:
     ```bash
-    curl -H "Accept: application/json" -H "Authorization: Basic YWRtaW46YWRtaW4=" -X GET http://127.0.0.1:8000/api/feeds/
+    curl -H "Accept: application/json" -H "Authorization: Basic YWRtaW46YWRtaW4=" -X GET http://localhost:8000/api/feeds/
     ```
 ### Running Django Shell
 ```bash

@@ -1,5 +1,3 @@
-from typing import List
-
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -7,7 +5,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
-from rest_framework.permissions import IsAdminUser, IsAuthenticated, BasePermission
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
@@ -22,22 +20,22 @@ class FeedViewSet(ModelViewSet):
 
     def get_permissions(self):
         permission_classes = [IsAuthenticated]
-        if self.action in ("following_me", "unfollowing_me", "force_update"):
+        if self.action in ("follow_me", "unfollow_me", "force_update"):
             return [IsAuthenticated()]
         if self.action not in ("list", "retrieve"):
             # FIXME: consider adding force_update to the IsAdminUser permission
             permission_classes += [IsAdminUser]
         return [permission() for permission in permission_classes]
 
-    @action(detail=True, methods=["POST"], url_path="following-me")
-    def following_me(self, request, pk=None):
+    @action(detail=True, methods=["POST"], url_path="follow-me")
+    def follow_me(self, request, pk=None):
         user = request.user
         instance = self.get_object()
         instance.follow(user)
         return Response({}, status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=["POST"], url_path="unfollowing-me")
-    def unfollowing_me(self, request, pk=None):
+    @action(detail=True, methods=["POST"], url_path="unfollow-me")
+    def unfollow_me(self, request, pk=None):
         user = request.user
         instance = self.get_object()
         instance.unfollow(user)

@@ -40,18 +40,18 @@ def test_create(user, superuser, client, super_client):
     assert response.data == expected
 
 
-def test_multiple_following_me(user, client):
+def test_multiple_follow_me(user, client):
     feeds = FeedFactory.create_batch(size=4)
 
     feed1 = feeds[0]
-    response = client.post(reverse(f"{route_basename}-following-me", args=[feed1.id]), format="json")
+    response = client.post(reverse(f"{route_basename}-follow-me", args=[feed1.id]), format="json")
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert feed1.is_followed_by(user)
     assert feed1.followers.filter(pk=user.pk).exists()
 
     feed2 = feeds[3]
-    response = client.post(reverse(f"{route_basename}-following-me", args=[feed2.id]), format="json")
+    response = client.post(reverse(f"{route_basename}-follow-me", args=[feed2.id]), format="json")
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert feed2.is_followed_by(user)
@@ -61,10 +61,10 @@ def test_multiple_following_me(user, client):
     assert [item[0] for item in user.feeds.order_by("pk").values_list("pk")] == [feed1.pk, feed2.pk]
 
 
-def test_unfollowing_me(user, client, feed):
+def test_unfollow_me(user, client, feed):
     feed.followers.add(user)
 
-    response = client.post(reverse(f"{route_basename}-unfollowing-me", args=[feed.id]), format="json")
+    response = client.post(reverse(f"{route_basename}-unfollow-me", args=[feed.id]), format="json")
 
     assert response.status_code == status.HTTP_204_NO_CONTENT
     assert feed.is_followed_by(user) is False
