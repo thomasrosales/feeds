@@ -50,6 +50,7 @@ class FeedViewSet(ModelViewSet):
                 {"error": "You must follow the feed before force refresh"}, status=status.HTTP_400_BAD_REQUEST
             )
         instance.process_source_posts(force=True)
+        instance.refresh_from_db()
         return Response({"state": instance.state}, status=status.HTTP_200_OK)
 
 

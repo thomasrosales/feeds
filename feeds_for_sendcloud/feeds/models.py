@@ -15,7 +15,12 @@ from .tasks import process_posts
 
 
 class Feed(LifecycleModel, TimeStampedModel):
-    VALID_SOURCES = ("application/rss+xml; charset=utf-8", "text/xml", "text/xml; charset=utf-8")
+    VALID_SOURCES = (
+        "application/rss+xml; charset=utf-8",
+        "text/xml",
+        "text/xml; charset=utf-8",
+        "application/xml; charset=utf-8",
+    )
     STATE_CHOICES = Choices("initial", "processing", "updated", "failed", "invalid")
     source = models.URLField(max_length=500, unique=True, db_index=True)
     last_refresh = models.DateTimeField(default=None, null=True)
@@ -50,7 +55,7 @@ class Feed(LifecycleModel, TimeStampedModel):
         if response.status_code != status.HTTP_200_OK:
             self.state = self.STATE_CHOICES.failed
             self.source_err = {"status_code": response.status_code, "error": response.text}
-        elif response.headers["content-type"] not in self.VALID_SOURCES or not xml_is_present(
+        elif response.headers["content-type"] not in Feed.VALID_SOURCES and not xml_is_present(
             response.headers["content-type"]
         ):
             self.state = self.STATE_CHOICES.invalid
