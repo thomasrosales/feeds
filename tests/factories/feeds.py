@@ -10,6 +10,7 @@ class FeedFactory(DjangoModelFactory):
 
     class Meta:
         model = Feed
+        skip_postgeneration_save = True
 
     @post_generation
     def posts(self, create, extracted, **kwargs):
@@ -30,5 +31,6 @@ class PostFactory(DjangoModelFactory):
 
     class Meta:
         model = Post
+        skip_postgeneration_save = True
 
     feed = factory.SubFactory(FeedFactory)

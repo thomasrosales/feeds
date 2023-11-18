@@ -1,3 +1,5 @@
+from typing import List
+
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiParameter, extend_schema
@@ -5,7 +7,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, BasePermission
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
@@ -59,6 +61,7 @@ class PostViewSet(RetrieveModelMixin, ListModelMixin, GenericViewSet):
     filter_backends = [DjangoFilterBackend, PostReadOrNotFilterBackend, OrderingFilter]
     ordering_fields = ["feed__last_refresh"]
     filterset_fields = ["feed"]
+    ordering = ["id"]
 
     @extend_schema(
         parameters=[

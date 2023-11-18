@@ -1,7 +1,8 @@
 import feedparser
+from feedparser import FeedParserDict
 
 
-def parse_rss_to_dict(rss_content: str) -> dict:
+def parse_rss_to_dict(rss_content: str) -> FeedParserDict:
     """
     If the rss_content is an invalid rss xml format
     the result will contain the same structure as
@@ -12,5 +13,5 @@ def parse_rss_to_dict(rss_content: str) -> dict:
     return feedparser.parse(rss_content)
 
 
-def xml_is_present(rss_headers: dict) -> bool:
-    return "xml" in rss_headers
+def xml_is_present(rss_content_type_header: str) -> bool:
+    return "xml" in rss_content_type_header
