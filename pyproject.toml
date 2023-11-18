@@ -141,9 +141,10 @@ feedparser = "^6.0.10"
 eventlet = "^0.33.3"
 deprecation = "^2.1.0"
 setuptools = "^68.2.2"
+ipdb = "==0.13.11"
+gunicorn = {extras = ["eventlet"], version = "^21.2.0"}
 
 [tool.poetry.group.dev.dependencies]
-ipdb = "==0.13.11"
 flake8 = "==6.1.0"
 flake8-isort = "==6.0.0"
 black = "==22.12.0"
