@@ -87,7 +87,7 @@ def test_list(user, client, feed_with_posts):
 
     response = client.get(reverse(f"{route_basename}-list"), format="json")
 
-    expected = PostSerializer(Post.objects.filter(feed=feed1.pk), many=True).data
+    expected = PostSerializer(Post.objects.filter(feed=feed1.pk).order_by("id"), many=True).data
 
     assert response.status_code == status.HTTP_200_OK
     assert response.json() == expected
@@ -123,7 +123,7 @@ def test_list_filters(user, client, feed_with_posts):
     feed1.follow(user)
     feed2.follow(user)
 
-    read_posts = feed1.posts.all()[:5]
+    read_posts = Post.objects.filter(feed_id=feed1.pk).order_by("id")[:5]
     for post in read_posts:
         post.read(user)
 
@@ -141,7 +141,7 @@ def test_list_filters(user, client, feed_with_posts):
     response = client.get(f"{reverse(f'{route_basename}-list')}?read=false", format="json")
 
     expected = PostSerializer(
-        Post.objects.filter(feed__in=[feed1.pk, feed2.pk]).exclude(id__in=[p.id for p in read_posts]), many=True
+        Post.objects.filter(feed__in=[feed1.pk, feed2.pk]).exclude(id__in=[p.id for p in read_posts]).order_by("id"), many=True
     ).data
 
     assert response.status_code == status.HTTP_200_OK
