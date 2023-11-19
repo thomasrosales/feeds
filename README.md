@@ -25,11 +25,13 @@ During the implementation of the solution for the Feeds application the author d
 - If you followed a Feed and you have marked as read some Posts if you decided to unfollow the Feed the Posts read marks remains, although you can't filter or access to the posts till you start following again the Feed.
 - The author decided to use Django instead of FastAPI.
 - Test cases were added to the tests/ folder. There is still work to do regarding test cases, the author has covered the most important cases.
+- Celery was configured to run whit two workers and one main process.
 
 ## Documentation 
 
 - It was provided the following path to get the API documentation using swagger: http://localhost:8000/api/docs/
 - It was provided the following path to use the admin site: http://localhost:8000/admin/
+- It was provided the following path to use the Flower admin site for celery: http://localhost:5555
 - If you select the docker solution to run the application you will count with the following preloaded data [command](#setting-up-your-users):
 
     | Username 	   | Password 	 | Admin site access 	 |
@@ -51,7 +53,7 @@ During the implementation of the solution for the Feeds application the author d
    curl -H "Accept: application/json" -H "Authorization: Basic <AUTH_USER_TOKEN>" -X POST -d '{"source": "https://.../curl-post-json-example"}' http://localhost:8000/api/feeds/
    ```
    - After the feed creation a task is triggered to get all post related to that feed source, due to is a wrong RSS XML, the process will fail and marked as failed
-   - The workaround is to update the Feed state to "updated" and the last_refresh datetime field through admin site.
+   - The workaround is to update the Feed `state` to "updated" and the `last_refresh` field through admin site.
    - Once you save it, the async update process will take this Feed to start adding the new posts if it has at last one, however, due to the feed source is invalid the process will fail and will trigger the retry mechanism.
 
 2. Other solution may be to disconnect your internet when the application is running normally, this will produce every update post process of each Feed failed due to HTTP error connection, producing the retry mechanism trigger.
@@ -219,3 +221,9 @@ This app comes with Celery and you can run it in your local terminal as standalo
     set DJANGO_READ_DOT_ENV_FILE=True
     celery -A config.celery_app beat -l INFO
     ```
+
+## Improvements
+
+1. Add NGNIX in front of Gunicorn Server [Gunicorn + Nginx](https://gunicorn.org/#deployment)
+2. More test cases
+3. Setting for production environment, like HTTPS, etc

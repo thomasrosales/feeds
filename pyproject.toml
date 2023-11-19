@@ -143,6 +143,7 @@ deprecation = "^2.1.0"
 setuptools = "^68.2.2"
 ipdb = "==0.13.11"
 gunicorn = {extras = ["eventlet"], version = "^21.2.0"}
+flower = "^2.0.1"
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "==6.1.0"

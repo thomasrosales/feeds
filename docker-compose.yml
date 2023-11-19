@@ -46,6 +46,14 @@ services:
       restart: on-failure
       entrypoint: ["./scripts/celery_beat.sh"]
 
+    flower:
+      <<: *app
+      ports:
+        - "5555:5555"
+      depends_on:
+        - django
+      entrypoint: ["./scripts/flower.sh"]
+
 volumes:
   postgres_data: {}
   postgres_data_backups: {}
