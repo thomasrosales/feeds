@@ -35,8 +35,6 @@ services:
     celeryworker:
       <<: *app
       depends_on:
-        - postgres
-        - redis
         - django
       restart: on-failure
       entrypoint: ["./scripts/celery.sh"]
@@ -44,8 +42,6 @@ services:
     celerybeat:
       <<: *app
       depends_on:
-        - postgres
-        - redis
         - django
       restart: on-failure
       entrypoint: ["./scripts/celery_beat.sh"]
