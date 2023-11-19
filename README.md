@@ -51,7 +51,7 @@ During the implementation of the solution for the Feeds application the author d
 
 - It was provided the following path to get the API documentation using swagger: http://localhost:8000/api/docs/
 - It was provided the following path to use the admin site: http://localhost:8000/admin/
-- It was provided the following path to use the Flower admin site for celery: http://localhost:5555/
+- It was provided the following path to use the Flower service monitor for celery: http://localhost:5555/
 - If you select the docker solution to run the application you will count with the following preloaded data. You can also run it locally [command](#setting-up-your-users):
 
     | Username 	   | Password 	 | Admin site access 	 |
