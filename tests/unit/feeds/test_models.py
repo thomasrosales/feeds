@@ -57,6 +57,21 @@ def test_process_source_posts_invalid_headers(mock_requests_get, feed):
 
 
 @patch.object(requests, "get")
+def test_process_source_posts_xml_presents_in_header(mock_requests_get, feed):
+    mock_requests_get.return_value = Dict(
+        {"status_code": status.HTTP_200_OK, "text": "", "headers": {"content-type": "magic/xml"}}
+    )
+
+    feed.process_source_posts()
+
+    assert feed.posts.count() == 0
+    assert feed.state == "updated"
+    assert not feed.has_failed
+    assert not feed.is_invalid
+    mock_requests_get.assert_called_once_with(feed.source)
+
+
+@patch.object(requests, "get")
 def test_process_source_posts_wrong_source(mock_requests_get, feed):
     mock_requests_get.return_value = Dict(
         {"status_code": status.HTTP_400_BAD_REQUEST, "text": {"error": "some error"}}

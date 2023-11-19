@@ -6,7 +6,7 @@ services:
         - postgres_local_data:/var/lib/postgresql/data
         - postgres_local_data_backups:/backups
       env_file:
-        - ./docker/envs/local/.postgres
+        - envs/local/.postgres
       ports:
         - "5433:5432"
 
