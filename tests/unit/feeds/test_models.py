@@ -3,6 +3,7 @@ from unittest.mock import patch
 import pytest
 import requests
 from addict import Dict
+from requests.exceptions import ConnectionError
 from rest_framework import status
 
 pytestmark = pytest.mark.django_db
@@ -38,6 +39,19 @@ def test_process_source_posts_success(mock_requests_get, feed, rss_xml):
     assert feed.posts.count() == 2
     assert all(title in feed.posts.values_list("title", flat=True) for title in ["RSS Tutorial", "XML Tutorial"])
     assert feed.state == "updated"
+    mock_requests_get.assert_called_once_with(feed.source)
+
+
+@patch.object(requests, "get")
+def test_process_source_posts_connection_error(mock_requests_get, feed, rss_xml):
+    mock_requests_get.side_effect = ConnectionError("some error")
+
+    feed.process_source_posts()
+
+    assert feed.posts.count() == 0
+    assert feed.state == "failed"
+    assert feed.has_failed
+    assert feed.source_err == {"error": "some error"}
     mock_requests_get.assert_called_once_with(feed.source)
 
 
