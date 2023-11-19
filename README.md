@@ -2,6 +2,26 @@
 
 Sendcloud interview project
 
+# Table of contents
+1. [Requirements](#requirements)
+2. [Business decisions](#business-decisions)
+3. [Documentation](#documentation)
+   1. [How to recreate the retry mechanism scenario](#how-to-recreate-the-retry-mechanism-scenario)
+   2. [How to recreate the force update scenario](#how-to-recreate-the-force-update-scenario)
+4. [Docker](#docker)
+5. [Local Deployment](#local-deployment)
+6. [Settings](#settings)
+7. [Basic Commands](#basic-commands)
+   1. [Setting Up Your Users](#setting-up-your-users)
+   2. [Running Django App](#running-django-app)
+   3. [Getting Basic Authentication](#getting-basic-authentication)
+   4. [Running Django Shell](#running-django-shell)
+   5. [Running Pytest](#running-pytest)
+   6. [Running Coverage](#running-coverage)
+   7. [Running Type Checks](#running-type-checks)
+   8. [Running Celery](#running-celery)
+8. [Improvements](#improvements)
+
 ## Requirements
 
 Have installed:
@@ -9,7 +29,7 @@ Have installed:
 - Python >= 3.9
 - Poetry >= 1.7.0
 - Docker or Docker Desktop >= 24.0.6
-- Postgres (you can use a docker container) >= 13.5 (for local deployment is configured to use SQLLite or Postgres, the author recommends had Postgres installed)
+- Postgres (you can use a docker container or the dockerized solution) >= 13.5 (for local deployment the author recommends had Postgres installed)
 
 ## Business decisions
 
@@ -17,22 +37,22 @@ During the implementation of the solution for the Feeds application the author d
 
 - All users must be authenticated to use the service.
   - The authentication selected for the application is BasicAuthentication. Basic authentication requires the header `Authorization: Basic token`. [Here](#getting-basic-authentication)
-- If you want to create/update/remove new Feed you must be superuser/admin user or has admin site access. To do it you need to create a superuser using django commands. [Here](#setting-up-your-users).
-  - There are 3 fields you cannot update through API: last_refresh, state, and source_err because they are part of the async update posts process
+- If you want to create/update/remove a Feed you must be admin user or has admin site access. To do it you need to create a superuser using django commands. [Here](#setting-up-your-users).
+  - There are 3 fields you cannot update through API: `last_refresh`, `state`, and `source_err` because they are part of the async update posts process
 - If you want to force the update process on a Feed you must follow the Feed first.
 - If you want to mark as read/unread a post you must follow the Feed first.
 - If you want to see a specific Posts you must follow the Feed first.
-- If you followed a Feed and you have marked as read some Posts if you decided to unfollow the Feed the Posts read marks remains, although you can't filter or access to the posts till you start following again the Feed.
+- If you followed a Feed and you have marked as read some Posts and you decided to unfollow the Feed then the posts read marks remains, although you can't filter or access to the posts till you start following again the Feed.
 - The author decided to use Django instead of FastAPI.
-- Test cases were added to the tests/ folder. There is still work to do regarding test cases, the author has covered the most important cases.
+- Test cases were added to the `tests/` folder. There is still work to do regarding test cases, the author has covered the most important cases.
 - Celery was configured to run whit two workers and one main process.
 
-## Documentation 
+## Documentation
 
 - It was provided the following path to get the API documentation using swagger: http://localhost:8000/api/docs/
 - It was provided the following path to use the admin site: http://localhost:8000/admin/
-- It was provided the following path to use the Flower admin site for celery: http://localhost:5555
-- If you select the docker solution to run the application you will count with the following preloaded data [command](#setting-up-your-users):
+- It was provided the following path to use the Flower admin site for celery: http://localhost:5555/
+- If you select the docker solution to run the application you will count with the following preloaded data. You can also run it locally [command](#setting-up-your-users):
 
     | Username 	   | Password 	 | Admin site access 	 |
     |--------------|------------|---------------------|
@@ -53,11 +73,10 @@ During the implementation of the solution for the Feeds application the author d
    curl -H "Accept: application/json" -H "Authorization: Basic <AUTH_USER_TOKEN>" -X POST -d '{"source": "https://.../curl-post-json-example"}' http://localhost:8000/api/feeds/
    ```
    - After the feed creation a task is triggered to get all post related to that feed source, due to is a wrong RSS XML, the process will fail and marked as failed
-   - The workaround is to update the Feed `state` to "updated" and the `last_refresh` field through admin site.
+   - The workaround is to update the Feed `state` to "updated" and the `last_refresh` field to a date in the past (between 1 and 5 minutes ago since you performed this step) through admin site.
    - Once you save it, the async update process will take this Feed to start adding the new posts if it has at last one, however, due to the feed source is invalid the process will fail and will trigger the retry mechanism.
 
 2. Other solution may be to disconnect your internet when the application is running normally, this will produce every update post process of each Feed failed due to HTTP error connection, producing the retry mechanism trigger.
- 
 
 ### How to recreate the force update scenario
 
@@ -81,11 +100,34 @@ During the implementation of the solution for the Feeds application the author d
 
 ## Docker
 
-```bash
-docker-compose up --build -d
-docker-compose -f ./docker/docker-compose-local.yml up --build -d
-docker-compose down
-```
+For this project were created a docker-compose.yml to deploy all infrastructure that application needs. The docker compose is a specification to tell docker how to create and deploy the new infrastructure for the application, such us, database services, redis, celery, the application itself, etc.
+
+Requirements:
+
+- Had Docker installed. [Here](https://docs.docker.com/engine/install/).
+
+1. Execute the next command to build and run the application infrastructure:
+
+    ```bash
+    cd <PROJECT_PATH>/feeds/
+    docker-compose up --build -d
+    ```
+
+2. Start and stop application when you need:
+
+    ```bash
+    docker-compose stop|start
+    ```
+3. Remove all infrastructure:
+
+    ```bash
+    docker-compose down
+    ```
+4. If you need just some services to run the application locally the author added a special docker-compose called docker-compose-local.yml that just creates the postgres and redis services:
+
+    ```bash
+    docker-compose -f ./docker/docker-compose-local.yml up --build -d
+    ```
 
 ## Local Deployment
 
@@ -141,7 +183,7 @@ Now you are able to run the django application locally. [Here](#running-django-a
     ```bash
     python manage.py createsuperuser
     ```
-- For test purpose a command was added to create 1 superuser, 2 regular users, and 3 Feeds, use this command:
+- For test purpose a command was added to create 1 superuser, 2 regular users, and 3 Feeds:
     ```bash
     python manage.py create_user_feeds_for_testing_purpose
     ```
@@ -153,7 +195,7 @@ python manager.py runserver_plus
 
 ### Getting Basic Authentication
 
-This perform this step the django application must be running. **[Go here](#running-django-app)**
+To perform this step the django application must be initialized and migrations run. **[Go here](#settings)**
 
 - To create a *regular user*, go to the admin site where you can create, edit and remove users. Once you have created a user or a superuser you must generate a base64 token to be used as a basic token:
    ```bash
