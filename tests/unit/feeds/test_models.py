@@ -42,6 +42,25 @@ def test_process_source_posts_success(mock_requests_get, feed, rss_xml):
 
 
 @patch.object(requests, "get")
+def test_process_source_posts_success_duplicated_posts(mock_requests_get, feed, rss_xml):
+    mock_requests_get.return_value = Dict(
+        {"status_code": status.HTTP_200_OK, "text": rss_xml, "headers": {"content-type": "text/xml"}}
+    )
+
+    feed.process_source_posts()
+
+    # Execute the process again
+
+    feed.process_source_posts()
+
+    assert feed.posts.count() == 2
+    assert all(title in feed.posts.values_list("title", flat=True) for title in ["RSS Tutorial", "XML Tutorial"])
+    assert feed.state == "updated"
+    mock_requests_get.assert_called_with(feed.source)
+    assert mock_requests_get.call_count == 2
+
+
+@patch.object(requests, "get")
 def test_process_source_posts_invalid_headers(mock_requests_get, feed):
     mock_requests_get.return_value = Dict(
         {"status_code": status.HTTP_200_OK, "text": "", "headers": {"content-type": "text/html"}}

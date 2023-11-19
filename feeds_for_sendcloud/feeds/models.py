@@ -68,11 +68,16 @@ class Feed(LifecycleModel, TimeStampedModel):
     def _process_rss_content_and_create_posts(self, rss_content):
         rss = parse_rss_to_dict(rss_content)
         new_posts = []
-        for entry in rss.entries:
-            if not self.posts.filter(link=entry.link).exists():
-                post = Post(title=entry.title, description=entry.get("description", ""), link=entry.link, feed=self)
-                new_posts.append(post)
+        entries = self._get_valid_entries(rss)
+        for entry in entries:
+            post = Post(title=entry.title, description=entry.get("description", ""), link=entry.link, feed=self)
+            new_posts.append(post)
         Post.objects.bulk_create(new_posts)
+
+    def _get_valid_entries(self, rss):
+        entries_links = [entry.link for entry in rss.entries]
+        existing_posts = list(self.posts.filter(link__in=entries_links).values_list("link", flat=True))
+        return {entry for entry in rss.entries if entry.link not in existing_posts}
 
     def follow(self, user: User):
         self.followers.add(user)
