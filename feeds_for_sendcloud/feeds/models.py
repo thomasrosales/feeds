@@ -5,6 +5,7 @@ from django.db import models
 from django_lifecycle import AFTER_SAVE, LifecycleModel, hook
 from model_utils import Choices
 from model_utils.models import TimeStampedModel
+from requests.exceptions import ConnectionError
 from rest_framework import status
 
 from feeds_for_sendcloud.users.models import User
@@ -51,28 +52,38 @@ class Feed(LifecycleModel, TimeStampedModel):
     def process_source_posts(self, force=False):
         if self.is_invalid and not force:
             return
-        response = requests.get(self.source)
-        if response.status_code != status.HTTP_200_OK:
+        try:
+            response = requests.get(self.source)
+        except ConnectionError as err:
             self.state = self.STATE_CHOICES.failed
-            self.source_err = {"status_code": response.status_code, "error": response.text}
-        elif response.headers["content-type"] not in Feed.VALID_SOURCES and not xml_is_present(
-            response.headers["content-type"]
-        ):
-            self.state = self.STATE_CHOICES.invalid
+            self.source_err = {"error": str(err)}
         else:
-            self._process_rss_content_and_create_posts(response.text)
-            self.state = self.STATE_CHOICES.updated
-            self.last_refresh = datetime.now(timezone.utc)
+            if response.status_code != status.HTTP_200_OK:
+                self.state = self.STATE_CHOICES.failed
+                self.source_err = {"status_code": response.status_code, "error": response.text}
+            elif response.headers["content-type"] not in Feed.VALID_SOURCES and not xml_is_present(
+                response.headers["content-type"]
+            ):
+                self.state = self.STATE_CHOICES.invalid
+            else:
+                self._process_rss_content_and_create_posts(response.text)
+                self.state = self.STATE_CHOICES.updated
+                self.last_refresh = datetime.now(timezone.utc)
         self.save()
 
     def _process_rss_content_and_create_posts(self, rss_content):
         rss = parse_rss_to_dict(rss_content)
         new_posts = []
-        for entry in rss.entries:
-            if not self.posts.filter(link=entry.link).exists():
-                post = Post(title=entry.title, description=entry.get("description", ""), link=entry.link, feed=self)
-                new_posts.append(post)
+        entries = self._get_valid_entries(rss)
+        for entry in entries:
+            post = Post(title=entry.title, description=entry.get("description", ""), link=entry.link, feed=self)
+            new_posts.append(post)
         Post.objects.bulk_create(new_posts)
+
+    def _get_valid_entries(self, rss):
+        entries_links = [entry.link for entry in rss.entries]
+        existing_posts = list(self.posts.filter(link__in=entries_links).values_list("link", flat=True))
+        return {entry for entry in rss.entries if entry.link not in existing_posts}
 
     def follow(self, user: User):
         self.followers.add(user)

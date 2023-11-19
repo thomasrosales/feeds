@@ -52,6 +52,7 @@ During the implementation of the solution for the Feeds application the author d
 - It was provided the following path to get the API documentation using swagger: http://localhost:8000/api/docs/
 - It was provided the following path to use the admin site: http://localhost:8000/admin/
 - It was provided the following path to use the Flower service monitor for celery: http://localhost:5555/
+- It was provided the postman collections + environment to use the Feed API: `/docs/postman/` folder
 - If you select the docker solution to run the application you will count with the following preloaded data. You can also run it locally [command](#setting-up-your-users):
 
     | Username 	   | Password 	 | Admin site access 	 |
@@ -62,9 +63,9 @@ During the implementation of the solution for the Feeds application the author d
 
     | Feed                                        	 | Posts 	 | Next Execution                	 |
     |-----------------------------------------------|---------|---------------------------------|
-    | https://www.clarin.com/rss/lo-ultimo/       	 | 0     	 | 2 minutes from docker started 	 |
-    | http://www.nu.nl/rss/Algemeen               	 | 0     	 | 2 minutes from docker started 	 |
-    | https://feeds.feedburner.com/tweakers/mixed 	 | 0     	 | 2 minutes from docker started 	 |
+    | https://www.clarin.com/rss/lo-ultimo/       	 | 0     	 | 3 minutes from docker started 	 |
+    | http://www.nu.nl/rss/Algemeen               	 | 0     	 | 3 minutes from docker started 	 |
+    | https://feeds.feedburner.com/tweakers/mixed 	 | 0     	 | 3 minutes from docker started 	 |
 
 ### How to recreate the retry mechanism scenario
 
@@ -76,8 +77,9 @@ During the implementation of the solution for the Feeds application the author d
    - The workaround is to update the Feed `state` to "updated" and the `last_refresh` field to a date in the past (between 1 and 5 minutes ago since you performed this step) through admin site.
    - Once you save it, the async update process will take this Feed to start adding the new posts if it has at last one, however, due to the feed source is invalid the process will fail and will trigger the retry mechanism.
 
+   ![Admin site example](./docs/examples/adminsite-update-feed.jpg)
 2. Other solution may be to disconnect your internet when the application is running normally, this will produce every update post process of each Feed failed due to HTTP error connection, producing the retry mechanism trigger.
-
+   ![Failing task](./docs/examples/failed-feeds.png)
 ### How to recreate the force update scenario
 
 1. Create a feed with a wrong source type (a wrong source is a website that returns something different to a rss xml):
@@ -127,6 +129,11 @@ Requirements:
 
     ```bash
     docker-compose -f ./docker/docker-compose-local.yml up --build -d
+    ```
+5. Connect to docker container application from the local terminal:
+
+    ```bash
+    docker-compose exec -t -i django bash
     ```
 
 ## Local Deployment
