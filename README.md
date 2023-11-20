@@ -144,10 +144,10 @@ Requirements:
     ```bash
     docker build -f docker\Dockerfile --target testing -t testing .
     ```
-   This commands takes all steps declared in the Dockerfile testing stage to prepare the docker file to run testing and coverage
+   This commands takes all steps declared in the Dockerfile testing stage to prepare the docker file to run tests and coverage report
 2. Run a container:
     ```bash
-    docker run --rm --name testing testing .
+    docker run --rm --name testing testing
     ```
    This command will create a new container called testing, during his creation you shaw see running coverage with pytest and the last output is the coverage report of the application.
 
