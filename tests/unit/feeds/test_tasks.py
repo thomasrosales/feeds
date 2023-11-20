@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from datetime import datetime, timedelta, timezone
 from unittest.mock import patch
 
@@ -22,10 +24,20 @@ def test_process_feeds_posts(mock_update_single_feed_posts, caplog):
     date_last_refresh = datetime.now(timezone.utc) - timedelta(minutes=6)
     feeds = FeedFactory.create_batch(size=5, state="updated", last_refresh=date_last_refresh)
 
-    process_feeds_posts()
+    if settings.IS_SQLLITE_TESTING:
+        with patch.object(
+            Feed,
+            "next_execution_objects"
+        ) as mock_next_execution_objects:
+            mock_next_execution_objects.all.return_value = Feed.objects.all()
+            process_feeds_posts()
+    else:
+        process_feeds_posts()
 
     assert mock_update_single_feed_posts.delay.call_count == len(feeds)
     assert caplog.messages[0] == "Feeds to be processing: 5"
+    if settings.IS_SQLLITE_TESTING:
+        mock_next_execution_objects.all.assert_called_once()
 
 
 @patch("feeds_for_sendcloud.feeds.tasks.update_single_feed_posts")
@@ -33,9 +45,19 @@ def test_process_feeds_posts_up_to_date(mock_update_single_feed_posts):
     date_last_refresh = datetime.now(timezone.utc) - timedelta(minutes=2)
     _ = FeedFactory.create_batch(size=5, state="updated", last_refresh=date_last_refresh)
 
-    process_feeds_posts()
+    if settings.IS_SQLLITE_TESTING:
+        with patch.object(
+            Feed,
+            "next_execution_objects"
+        ) as mock_next_execution_objects:
+            mock_next_execution_objects.all.return_value = Feed.objects.none()
+            process_feeds_posts()
+    else:
+        process_feeds_posts()
 
     mock_update_single_feed_posts.delay.assert_not_called()
+    if settings.IS_SQLLITE_TESTING:
+        mock_next_execution_objects.all.assert_called_once()
 
 
 def test_update_single_feed_posts_success(feed, caplog):

@@ -135,6 +135,23 @@ Requirements:
     ```bash
     docker-compose exec -t -i django bash
     ```
+   
+### Testing Stage
+
+1. Build a new image with the following command:
+    ```bash
+    docker build -f docker\Dockerfile --target testing -t testing .
+    ```
+   This commands takes all steps declared in the Dockerfile testing stage to prepare the docker file to run testing and coverage
+2. Run a container:
+    ```bash
+    docker run --name testing testing .
+    ```
+   This command will create a new container called testing, during his creation you shaw see running coverage with pytest and the last output is the coverage report of the application.
+3. If you want to run multiple times remember to delete de container:
+    ```bash
+    docker rm testing --volumes
+    ```
 
 ## Local Deployment
 

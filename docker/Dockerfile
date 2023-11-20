@@ -1,6 +1,8 @@
-FROM python:3.9-slim-bullseye as python
+FROM python:3.9-slim-bullseye AS python
 
 ARG SYNC_ARGS
+
+FROM python AS base
 
 RUN mkdir /app \
     && mkdir /app/scripts \
@@ -21,6 +23,17 @@ RUN chmod +rwx ./scripts/entrypoint.sh \
 	&& chmod +rwx ./scripts/start.sh \
 	&& chmod +rwx ./scripts/celery.sh \
 	&& chmod +rwx ./scripts/celery_beat.sh \
-	&& chmod +rwx ./scripts/flower.sh
+	&& chmod +rwx ./scripts/flower.sh \
+    && chmod +rwx ./scripts/test.sh
 
 ENTRYPOINT ["./scripts/entrypoint.sh"]
+
+
+FROM base AS testing
+ENV DJANGO_SETTINGS_MODULE=config.settings.test
+ENV DATABASE_URL=sqlite:///db.sqlite
+ENV CELERY_BROKER_URL=redis://localhost:6379/0
+ENV SQLLITE=True
+COPY --from=base /app .
+WORKDIR /app
+ENTRYPOINT ["./scripts/test.sh"]
