@@ -108,6 +108,8 @@ Requirements:
 
 - Had Docker installed. [Here](https://docs.docker.com/engine/install/).
 
+### Deploy Application
+
 1. Execute the next command to build and run the application infrastructure:
 
     ```bash
@@ -135,6 +137,19 @@ Requirements:
     ```bash
     docker-compose exec -t -i django bash
     ```
+   
+### Testing Stage
+
+1. Build a new image with the following command:
+    ```bash
+    docker build -f docker\Dockerfile --target testing -t testing .
+    ```
+   This commands takes all steps declared in the Dockerfile testing stage to prepare the docker file to run testing and coverage
+2. Run a container:
+    ```bash
+    docker run --rm --name testing testing .
+    ```
+   This command will create a new container called testing, during his creation you shaw see running coverage with pytest and the last output is the coverage report of the application.
 
 ## Local Deployment
 

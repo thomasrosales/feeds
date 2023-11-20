@@ -5,6 +5,7 @@ With these settings, tests run faster.
 from .base import *  # noqa
 from .base import env
 
+IS_SQLLITE_TESTING = env.bool("SQLLITE", False)
 # GENERAL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#secret-key
