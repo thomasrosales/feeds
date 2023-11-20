@@ -108,6 +108,8 @@ Requirements:
 
 - Had Docker installed. [Here](https://docs.docker.com/engine/install/).
 
+### Deploy Application
+
 1. Execute the next command to build and run the application infrastructure:
 
     ```bash
@@ -145,13 +147,9 @@ Requirements:
    This commands takes all steps declared in the Dockerfile testing stage to prepare the docker file to run testing and coverage
 2. Run a container:
     ```bash
-    docker run --name testing testing .
+    docker run --rm --name testing testing .
     ```
    This command will create a new container called testing, during his creation you shaw see running coverage with pytest and the last output is the coverage report of the application.
-3. If you want to run multiple times remember to delete de container:
-    ```bash
-    docker rm testing --volumes
-    ```
 
 ## Local Deployment
 
