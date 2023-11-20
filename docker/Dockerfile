@@ -33,6 +33,4 @@ FROM base AS testing
 ENV DATABASE_URL=sqlite:///db.sqlite
 ENV CELERY_BROKER_URL=""
 ENV SQLLITE=True
-COPY --from=base /app .
-WORKDIR /app
 ENTRYPOINT ["./scripts/test.sh"]
