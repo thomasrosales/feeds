@@ -44,6 +44,7 @@ services:
       depends_on:
         - django
         - redis
+      restart: on-failure  # it needs sometime to get the database table from postgres
       command: ["./scripts/celery_beat.sh"]
 
     flower:
