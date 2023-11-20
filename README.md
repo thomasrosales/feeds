@@ -49,9 +49,9 @@ During the implementation of the solution for the Feeds application the author d
 
 ## Documentation
 
-- It was provided the following path to get the API documentation using swagger: http://localhost:8000/api/docs/
-- It was provided the following path to use the admin site: http://localhost:8000/admin/
-- It was provided the following path to use the Flower service monitor for celery: http://localhost:5555/
+- It was provided the following path to get the API documentation using swagger: http://localhost:8000/api/docs/ (public access)
+- It was provided the following path to use the admin site: http://localhost:8000/admin/ (superuser access)
+- It was provided the following path to use the Flower service monitor for celery: http://localhost:5555/ (public access)
 - It was provided the postman collections + environment to use the Feed API: `/docs/postman/` folder
 - If you select the docker solution to run the application you will count with the following preloaded data. You can also run it locally [command](#setting-up-your-users):
 

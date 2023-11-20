@@ -281,7 +281,8 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "Feeds For Sendcloud API",
     "DESCRIPTION": "Documentation of API endpoints of Feeds For Sendcloud",
     "VERSION": "1.0.0",
-    "SERVE_PERMISSIONS": ["rest_framework.permissions.IsAdminUser"],
+    # FIXME: it is public unless you want it private use: "rest_framework.permissions.IsAdminUser"
+    "SERVE_PERMISSIONS": [],
 }
 # Your stuff...
 # ------------------------------------------------------------------------------

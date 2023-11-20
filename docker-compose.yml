@@ -1,24 +1,21 @@
-version: '3'
-
-x-app: &app
-  build:
-    dockerfile: docker/Dockerfile
-    context: .
-    args:
-      - SYNC_ARGS=--without dev --sync
-    target: base
-  image: feeds_for_sendcloud_django
-  env_file:
-    - ./docker/envs/.django
-    - ./docker/envs/.postgres
+version: '3.4'
 
 services:
-    django:
-      <<: *app
+    django: &app
+      build:
+        dockerfile: docker/Dockerfile
+        context: .
+        args:
+          - SYNC_ARGS=--without dev --sync
+        target: base
+      image: feeds_for_sendcloud_django:latest
+      env_file:
+        - ./docker/envs/.django
+        - ./docker/envs/.postgres
       depends_on:
         - postgres
         - redis
-      entrypoint: ["./scripts/start.sh"]
+      command: ["./scripts/start.sh"]
       ports:
         - "8000:8000"
 
@@ -35,18 +32,19 @@ services:
 
     celery-worker:
       <<: *app
+      ports: []
       depends_on:
         - django
         - redis
-      restart: on-failure
-      entrypoint: ["./scripts/celery.sh"]
+      command: ["./scripts/celery.sh"]
 
     celery-beat:
       <<: *app
+      ports: []
       depends_on:
         - django
-      restart: on-failure
-      entrypoint: ["./scripts/celery_beat.sh"]
+        - redis
+      command: ["./scripts/celery_beat.sh"]
 
     flower:
       <<: *app
@@ -55,7 +53,7 @@ services:
       depends_on:
         - django
         - redis
-      entrypoint: ["./scripts/flower.sh"]
+      command: ["./scripts/flower.sh"]
 
 volumes:
   postgres_data: {}

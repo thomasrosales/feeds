@@ -14,11 +14,11 @@ db = env.db()
 
 try:
     psycopg2.connect(
-        dbname=db['NAME'],
-        user=db['USER'],
-        password=db['PASSWORD'],
-        host=db['HOST'],
-        port=db['PORT'],
+        dbname="${POSTGRES_DB}",
+        user="${POSTGRES_USER}",
+        password="${POSTGRES_PASSWORD}",
+        host="${POSTGRES_HOST}",
+        port="${POSTGRES_PORT}",
     )
 except psycopg2.OperationalError:
     sys.exit(-1)
