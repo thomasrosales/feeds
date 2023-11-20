@@ -30,9 +30,8 @@ ENTRYPOINT ["./scripts/entrypoint.sh"]
 
 
 FROM base AS testing
-ENV DJANGO_SETTINGS_MODULE=config.settings.test
 ENV DATABASE_URL=sqlite:///db.sqlite
-ENV CELERY_BROKER_URL=redis://localhost:6379/0
+ENV CELERY_BROKER_URL=""
 ENV SQLLITE=True
 COPY --from=base /app .
 WORKDIR /app
