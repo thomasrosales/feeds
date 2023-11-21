@@ -63,9 +63,9 @@ During the implementation of the solution for the Feeds application the author d
 
     | Feed                                        	 | Posts 	 | Next Execution                	 |
     |-----------------------------------------------|---------|---------------------------------|
-    | https://www.clarin.com/rss/lo-ultimo/       	 | 0     	 | 3 minutes from docker started 	 |
-    | http://www.nu.nl/rss/Algemeen               	 | 0     	 | 3 minutes from docker started 	 |
-    | https://feeds.feedburner.com/tweakers/mixed 	 | 0     	 | 3 minutes from docker started 	 |
+    | https://www.clarin.com/rss/lo-ultimo/       	 | 0     	 | 8 minutes from docker started 	 |
+    | http://www.nu.nl/rss/Algemeen               	 | 0     	 | 8 minutes from docker started 	 |
+    | https://feeds.feedburner.com/tweakers/mixed 	 | 0     	 | 8 minutes from docker started 	 |
 
 ### How to recreate the retry mechanism scenario
 
